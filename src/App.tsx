@@ -1,12 +1,11 @@
-import OperativeForm from './components/forms/OperativeForm'
 
-import styles from "./styles/main.module.scss"
+function App() {
 
-function App() {  
+
   return (
-      <div className={styles.wrapper}>
-        <OperativeForm/>
-      </div>
+    <>
+     <h1 className='text-5xl'>Hello World!</h1>
+    </>
   )
 }
 

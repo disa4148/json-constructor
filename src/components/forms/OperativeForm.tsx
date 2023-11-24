@@ -3,6 +3,8 @@ import IInputsItems from "../../types/IInputsItems";
 import JsonDisplay from "../JsonDisplay"
 import { SubmitHandler, useForm } from 'react-hook-form';
 import styles from '../../styles/main.module.scss'
+
+
 const OperativeForm = () => {
 
   const { register, handleSubmit, reset } = useForm<IInputsItems>()
@@ -13,10 +15,10 @@ const OperativeForm = () => {
     setFormData(data)
     reset()
   }
-
+  
   return (
     <div>
-         <form className={styles.mainContainerForm} onSubmit={handleSubmit(onSubmit)}>
+          <form className={styles.mainContainerForm} onSubmit={handleSubmit(onSubmit)}>
           <input placeholder="Название таблицы" type="text" {...register("name")} required/>
           <input placeholder="Описание таблицы" type="text" {...register("description")} required/>
           <input placeholder="Ширина" type="number" {...register("window.width")} required/>
