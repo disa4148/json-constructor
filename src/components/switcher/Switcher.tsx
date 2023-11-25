@@ -1,22 +1,40 @@
-import React, {useState} from 'react'
-import css from '../../styles/switcher/switcher.module.scss'
-import Selector from './Selector'
-
-type IWidget = "DataTime"|"Rsdu5Logo"|"SimpleText"|"Analogs.SingleValue"|"Analogs.TableGtp"
-
-// type Props = {}
-// props: Props
+import { useState } from "react"
+import WidgetOptions from "./WidgetOptions"
+import Selector from "./Selector"
+// import IWidgetEntry from "../../types/IWidgetEntry"
+import selectorList from "../../constants/SelectorList"
 const Switcher = () => {
-    const [widget, setWidget] = useState<IWidget>("DataTime")
-    console.log(widget, setWidget)
-  return (
-    <div className={css.wrapper}>
-        <h1 className='underline '>Доступные виджеты</h1>
-        <div className={css.selectsWrapper}>
-            <Selector/>
-        </div>
-    </div>
-  )
+   const [widget, setWidget] = useState()
+   return (
+      <div className='flex flex-row justify-center items-center gap-5'>
+         <div className='mx-2 pl-5 flex flex-col'>
+            <h1 className='font-bold text-xl'>Доступные виджеты</h1>
+            <div>
+               {selectorList.map((item: any, index: number) => (
+                  <div key={index}>
+                     <Selector
+                        data={item}
+                        displayedName={item.displayedName}
+                        onSetWidget={setWidget}
+                        type={item.type}
+                     />
+                  </div>
+               ))}
+            </div>
+         </div>
+         <div>
+            {widget ? (
+               <WidgetOptions data={widget}/>
+            ) : (
+               <h1 className='font-bold text-lg'>
+                  Выберите виджет
+                  <br />
+                  для настройки
+               </h1>
+            )}
+         </div>
+      </div>
+   )
 }
 
 export default Switcher

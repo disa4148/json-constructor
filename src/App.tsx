@@ -1,12 +1,10 @@
-
+import Switcher from "./components/switcher/Switcher"
 function App() {
-
-
-  return (
-    <>
-     <h1 className='text-5xl'>Hello World!</h1>
-    </>
-  )
+   return (
+      <>
+         <Switcher />
+      </>
+   )
 }
 
 export default App
