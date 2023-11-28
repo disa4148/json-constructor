@@ -2,78 +2,104 @@ import { useState, useEffect } from "react"
 import JsonDisplay from "../JsonDisplay"
 
 interface OptionProps {
-  text?: string
-  color?: string
-  fontSize?: number
-  fontWeight?: number
-  fontStyle?: string
-  verticalAlign?: string
-  horizontalAlign?: string
-  blockHeight?: number
-  blockWidth?: number
-  marginRight?: number
-  digitsAfterDot?: number
+   text?: string
+   color?: string
+   fontSize?: number
+   fontWeight?: number
+   fontStyle?: string
+   verticalAlign?: string
+   horizontalAlign?: string
+   blockHeight?: number
+   blockWidth?: number
+   marginRight?: number
+   digitsAfterDot?: number
+   [key: string]: any
 }
 
 interface WidgetOptionProps {
-  data: {
-    displayedName: string
-    options: OptionProps
-  }
+   data: {
+      displayedName: string
+      options: OptionProps
+   }
 }
 
-const WidgetOptions: React.FC<WidgetOptionProps> = ({ data: { displayedName, options } }) => {
-  const getInputType = (value: string | number | undefined) =>
-    typeof value === "number" ? "number" : "text"
+const WidgetOptions: React.FC<WidgetOptionProps> = ({
+   data: { displayedName, options },
+}) => {
+   const getInputType = (value: any) =>
+      typeof value === "number" ? "number" : "text"
 
-  const [inputValues, setInputValues] = useState<Record<string, string | number>>({})
+   const [inputValues, setInputValues] = useState<Record<string, any>>({})
 
-  useEffect(() => {
-    const initialValues: Record<string, string | number> = {};
-    Object.keys(options).forEach(key => {
-      initialValues[key] = options[key as keyof OptionProps] ?? "";
-    });
-    setInputValues(initialValues);
+   useEffect(() => {
+      const initialValues: Record<string, any> = {}
+      const fillInitialValues = (obj: any, prefix = "") => {
+         Object.keys(obj).forEach(key => {
+            const value = obj[key]
+            const fullKey = prefix ? `${prefix}.${key}` : key
+            if (value && typeof value === "object" && !Array.isArray(value)) {
+               fillInitialValues(value, fullKey)
+            } else {
+               initialValues[fullKey] = value ?? ""
+            }
+         })
+      }
+      fillInitialValues(options)
+      setInputValues(JSON.parse(JSON.stringify(options)));
   }, [options]);
 
-  const handleInputChange = (key: string, value: string | number) => {
-    setInputValues(prevValues => ({ ...prevValues, [key]: value }))
-  }
+  const handleInputChange = (path: string, value: any) => {
+   setInputValues(prevValues => {
+     // Создаем копию текущего состояния
+     const newValues = JSON.parse(JSON.stringify(prevValues));
 
-  const handleSubmit = () => {
-    console.log(inputValues)
-  }
+     // Получаем доступ к последнему элементу в пути
+     const keys = path.split('.');
+     let current = newValues;
+     keys.forEach((key, index) => {
+       if (index === keys.length - 1) {
+         current[key] = value;
+       } else {
+         current = current[key];
+       }
+     });
 
-  return (
-    <div>
+     return newValues;
+   });
+ };
+
+ const renderFields = (data: any, parentKey = ''):React.ReactNode => {
+   return Object.entries(data).map(([key, value]) => {
+     const fieldKey = parentKey ? `${parentKey}.${key}` : key;
+     if (typeof value === 'object' && value !== null) {
+       return renderFields(value, fieldKey);
+     } else {
+       return (
+         <div key={fieldKey}>
+           <label>{fieldKey}: </label>
+           <input
+             type={getInputType(value)}
+             value={inputValues[fieldKey] ?? ''}
+             onChange={(e) => handleInputChange(fieldKey, e.target.value)}
+           />
+         </div>
+       );
+     }
+   });
+ };
+
+   return (
       <div>
-        <h1>{displayedName}</h1>
-        <div className='flex flex-col gap-4'>
-          {Object.keys(options).map(key => (
-            <div key={key}>
-              <label>{key}: </label>
-              <input
-                type={getInputType(inputValues[key])}
-                value={inputValues[key] !== undefined ? inputValues[key].toString() : ''}
-                onChange={e =>
-                  handleInputChange(
-                    key,
-                    getInputType(inputValues[key]) === "number"
-                      ? Number(e.target.value)
-                      : e.target.value
-                  )
-                }
-              />
-            </div>
-          ))}
-        </div>
-        <button className='mt-[20px]' onClick={handleSubmit}>
-          Добавить
-        </button>
+         <h1>{displayedName}</h1>
+         <div className='flex flex-col gap-4'>
+         {renderFields(inputValues)}
+         </div>
+         <button className='mt-[20px]' onClick={() => console.log(inputValues)}>
+            Добавить
+         </button>
+         <JsonDisplay data={inputValues} />
       </div>
-      <JsonDisplay data={inputValues}/>
-    </div>
-  )
+   )
 }
 
 export default WidgetOptions
