@@ -3,57 +3,50 @@ import JsonDisplay from "../JsonDisplay";
 
 import IWidgetOptionProps from "@/interfaces/IWidgetOptionProps";
 
-// Компонент WidgetOptions для отображения и редактирования свойств виджета
 const WidgetOptions: React.FC<IWidgetOptionProps> = ({
   data: { displayedName, widget, id, x, y, width, height },
 }) => {
-  // Функция для определения типа ввода на основе значения
   const getInputType = (value: any) =>
     typeof value === "number" ? "number" : "text";
 
-  // Хуки состояния для хранения значений полей ввода и их локальных изменений
-  const [inputValues, setInputValues] = useState<Record<string, any>>({});
-  const [localInputValues, setLocalInputValues] = useState<Record<string, any>>(
-    {}
-  );
+  const [inputValues, setInputValues] = useState({});
+  const [localInputValues, setLocalInputValues] = useState({});
 
-  // Инициализация начального состояния компонента
   useEffect(() => {
+    // Начальные значения должны включать widget целиком
     const initialValues = {
       id,
       x,
       y,
       width,
       height,
-      widget,
+      widget
     };
     setInputValues(initialValues);
     setLocalInputValues(initialValues);
   }, [widget, id, x, y, width, height]);
 
-  // Обработчик изменений в полях ввода
   const handleInputChange = (path: string, value: any) => {
-    setLocalInputValues(prev => ({...prev, [path]: value}));
-    // Обновляем глобальное состояние, чтобы сохранить структуру данных
-    setInputValues(prevValues => {
+    setLocalInputValues((prev: Record<string, any>) => {
+      const newValues: Record<string, any> = { ...prev };
+      let current: Record<string, any> = newValues;
       const keys = path.split('.');
-      const newValues = { ...prevValues };
-      let current = newValues;
       for (let i = 0; i < keys.length - 1; i++) {
         if (!current[keys[i]]) {
           current[keys[i]] = {};
         }
-        current = current[keys[i]];
+        current = current[keys[i]] as Record<string, any>;
       }
       current[keys[keys.length - 1]] = value;
+  
+      setInputValues(newValues);
       return newValues;
     });
   };
   
-  // Рендеринг полей ввода для редактирования свойств виджета
+
   const renderFields = (data: any, parentPath = "") => {
     return Object.entries(data).map(([key, value]) => {
-      // Пропускаем рендеринг поля displayedName
       if (key === "displayedName") {
         return null;
       }
@@ -74,7 +67,7 @@ const WidgetOptions: React.FC<IWidgetOptionProps> = ({
             <label className="w-[120px]">{key}: </label>
             <input
               type={getInputType(value)}
-              value={localInputValues[path]}
+              value={getValueByPath(localInputValues, path) || ''}
               onChange={(e) => handleInputChange(path, e.target.value)}
             />
           </div>
@@ -83,7 +76,19 @@ const WidgetOptions: React.FC<IWidgetOptionProps> = ({
     });
   };
 
-  // Основной рендер компонента
+  const getValueByPath = (object: Record<string, any>, path: string): any => {
+    const keys = path.split('.');
+    let current: any = object;
+    for (let key of keys) {
+      if (current[key] === undefined) {
+        return undefined;
+      }
+      current = current[key];
+    }
+    return current;
+  };
+  
+
   return (
     <div className="flex flex-row">
       <div>

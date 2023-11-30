@@ -20,6 +20,7 @@ export const selectorList = [
       y: 0,
       width: 200,
       height: 2,
+      widget: {
       options: {
          format: "DD.MM.YYYY HH:mm:ss",
          color: "#0000ff",
@@ -28,6 +29,7 @@ export const selectorList = [
          fontStyle: "normal",
          textAlign: "right",
       },
+   },
    },
    {
       
