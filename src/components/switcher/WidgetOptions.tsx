@@ -33,21 +33,23 @@ const WidgetOptions: React.FC<IWidgetOptionProps> = ({
 
   // Обработчик изменений в полях ввода
   const handleInputChange = (path: string, value: any) => {
-    setLocalInputValues(prev => {
-      // Создаем новый объект состояния, основываясь на текущем
-      const newState = {...prev};
-  
-      // Разбиваем путь на части и обновляем нужное значение
-      const keys = path.split(".");
-      let current = newState;
+    setLocalInputValues(prev => ({...prev, [path]: value}));
+    // Обновляем глобальное состояние, чтобы сохранить структуру данных
+    setInputValues(prevValues => {
+      const keys = path.split('.');
+      const newValues = { ...prevValues };
+      let current = newValues;
       for (let i = 0; i < keys.length - 1; i++) {
-        current = current[keys[i]] = current[keys[i]] ?? {};
+        if (!current[keys[i]]) {
+          current[keys[i]] = {};
+        }
+        current = current[keys[i]];
       }
       current[keys[keys.length - 1]] = value;
-  
-      return newState;
+      return newValues;
     });
   };
+  
   // Рендеринг полей ввода для редактирования свойств виджета
   const renderFields = (data: any, parentPath = "") => {
     return Object.entries(data).map(([key, value]) => {
